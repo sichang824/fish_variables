@@ -19,6 +19,17 @@ fisher install username/fish_variables
 
 Replace `username` with the actual GitHub username where this repository is hosted.
 
+### Using Make (Symbolic Links)
+
+If you've cloned the repository, you can use the included Makefile which creates symbolic links:
+
+```fish
+cd path/to/fish_variables
+make install
+```
+
+This will create symbolic links from the plugin files to your Fish configuration directories, allowing you to make changes to the plugin code that will immediately be available without reinstallation.
+
 ### Manual Installation
 
 If you prefer to install manually:
@@ -29,27 +40,13 @@ If you prefer to install manually:
 git clone https://github.com/username/fish_variables ~/.config/fish/fish_variables
 ```
 
-2. Create symbolic links or copy files:
+2. Create symbolic links:
 
 ```fish
-# Option 1: Create symbolic links
+# Create symbolic links
 ln -s ~/.config/fish/fish_variables/functions/*.fish ~/.config/fish/functions/
 ln -s ~/.config/fish/fish_variables/completions/*.fish ~/.config/fish/completions/
 ln -s ~/.config/fish/fish_variables/conf.d/*.fish ~/.config/fish/conf.d/
-
-# Option 2: Copy files
-cp ~/.config/fish/fish_variables/functions/*.fish ~/.config/fish/functions/
-cp ~/.config/fish/fish_variables/completions/*.fish ~/.config/fish/completions/
-cp ~/.config/fish/fish_variables/conf.d/*.fish ~/.config/fish/conf.d/
-```
-
-### Using Make
-
-If you've cloned the repository, you can use the included Makefile:
-
-```fish
-cd path/to/fish_variables
-make install
 ```
 
 ## Verifying Installation
@@ -72,13 +69,14 @@ fisher update username/fish_variables
 
 ### Manual Update
 
-If you installed manually, pull the latest changes and copy/link the files again:
+If you installed using symbolic links (via Make or manually), pull the latest changes:
 
 ```fish
-cd ~/.config/fish/fish_variables
+cd path/to/fish_variables
 git pull
-# Then repeat the symbolic links or copy steps from the Manual Installation section
 ```
+
+Since you're using symbolic links, there's no need to reinstall after updating.
 
 ## Uninstallation
 
@@ -88,18 +86,27 @@ git pull
 fisher remove username/fish_variables
 ```
 
-### Manual Uninstallation
+### Using Make
 
-Remove the symlinks or files:
+If you installed using the Makefile:
 
 ```fish
-# Remove symlinks or files
+cd path/to/fish_variables
+make uninstall
+```
+
+### Manual Uninstallation
+
+Remove the symbolic links:
+
+```fish
+# Remove symlinks
 rm ~/.config/fish/functions/fish_vars*.fish
 rm ~/.config/fish/completions/fish_vars*.fish
-rm ~/.config/fish/conf.d/fish_vars*.fish
+rm ~/.config/fish/conf.d/fish_variables*.fish
 
 # Optionally remove the cloned repository
-rm -rf ~/.config/fish/fish_variables
+rm -rf path/to/fish_variables
 ```
 
 ## Troubleshooting
@@ -112,16 +119,16 @@ rm -rf ~/.config/fish/fish_variables
    ls -la ~/.config/fish/functions/fish_vars*.fish
    ```
 
-2. **Permission issues**: Check file permissions.
+2. **Broken symbolic links**: If you see errors about broken links, check that your repository path is correct.
 
    ```fish
-   chmod +x ~/.config/fish/functions/fish_vars*.fish
+   find ~/.config/fish -type l -name "fish_vars*" -exec ls -la {} \;
    ```
 
-3. **Path issues**: Make sure your Fish configuration paths are correct.
+3. **Permission issues**: Check file permissions.
 
    ```fish
-   echo $fish_function_path
+   chmod +x path/to/fish_variables/functions/*.fish
    ```
 
 If you encounter any other issues, please open an issue on the GitHub repository.

@@ -1,111 +1,141 @@
-# Fish 变量管理工具
+# Fish Variables Management Tool
 
-这个 Fisher 插件用于检查和修复 Fish shell 配置变量，特别是那些容易出现重复定义的变量。
+This Fisher plugin is designed to check and fix Fish shell configuration variables, especially those prone to duplicate definitions.
 
-## 功能
+## Features
 
-- 检查变量是否存在重复定义
-- 检查变量值是否与预期相符
-- 修复变量问题（删除重复定义并设置正确值）
-- 列出所有重复定义的变量
-- 导出推荐配置到文件
+- Check for duplicate variable definitions
+- Verify variable values against expected values
+- Fix variable issues (remove duplicates and set correct values)
+- List all duplicate variables
+- Export recommended configuration to a file
 
-## 安装
+## Installation
 
-使用 Fisher 安装：
+### Using Fisher
+
+Install using Fisher:
 
 ```fish
 fisher install username/fish_variables
 ```
 
-## 使用方法
+### Using Make (Recommended for Development)
 
-### 检查单个变量
+If you've cloned the repository, use the Makefile which creates symbolic links:
 
 ```fish
-# 检查单个变量
+cd path/to/fish_variables
+make install
+```
+
+This creates symbolic links to your Fish configuration directories, allowing you to make changes to the plugin code that will be immediately available.
+
+See the [detailed installation guide](docs/installation.md) for more options.
+
+## Usage
+
+### Check a Single Variable
+
+```fish
+# Check a single variable
 fish_vars check fish_history_save_on_command true
 ```
 
-### 使用配置文件检查多个变量
+### Check Multiple Variables Using a Configuration File
 
 ```fish
-# 首先导出配置模板
+# First export a configuration template
 fish_vars export ~/my_vars.conf
 
-# 编辑配置文件
+# Edit the configuration file
 vim ~/my_vars.conf
 
-# 使用配置文件检查变量
+# Check variables using the configuration file
 fish_vars check --file ~/my_vars.conf
 ```
 
-### 修复变量
+### Fix Variables
 
 ```fish
-# 修复单个变量
+# Fix a single variable
 fish_vars fix sponge_purge_only_on_exit true
 
-# 使用配置文件修复多个变量
+# Fix multiple variables using a configuration file
 fish_vars fix --file ~/my_vars.conf
 ```
 
-### 查找重复定义的变量
+### Find Duplicate Variables
 
 ```fish
-# 列出所有重复定义的变量
+# List all duplicate variables
 fish_vars list
 ```
 
-### 获取帮助
+### Get Help
 
 ```fish
 fish_vars help
 ```
 
-## 配置文件格式
+## Configuration File Format
 
-配置文件使用简单的文本格式，每行一个变量定义：
-
-```
-# 这是注释
-变量名 值
-```
-
-例如：
+The configuration file uses a simple text format with one variable definition per line:
 
 ```
-# Fish 历史记录设置
+# This is a comment
+VARIABLE_NAME VALUE
+```
+
+Example:
+
+```
+# Fish history settings
 fish_history_save_on_command true
 fish_history_ignore_failures false
 
-# Sponge 插件设置
+# Sponge plugin settings
 sponge_purge_only_on_exit true
 sponge_filters sponge_filter_failed sponge_filter_matched
 ```
 
-## 常见问题解决
+## Common Issues
 
-### 修复重复定义的变量
+### Fixing Duplicate Variables
 
-出现重复定义的变量通常是因为多次使用 `set -U` 命令设置同一个变量。使用 `fish_vars list` 找出这些变量，然后使用 `fish_vars fix` 命令修复：
+Duplicate variables typically occur from multiple uses of the `set -U` command for the same variable. Use `fish_vars list` to find these variables, then fix them with the `fish_vars fix` command:
 
 ```fish
-fish_vars fix 变量名 值
+fish_vars fix VARIABLE_NAME VALUE
 ```
 
-### 使用推荐配置
+### Using Recommended Configuration
 
-可以使用 `export` 命令导出推荐配置，然后根据需要修改：
+You can export recommended configuration with the `export` command, then modify as needed:
 
 ```fish
 fish_vars export ~/.config/fish/recommended_vars.conf
 ```
 
-## 自定义
+## Documentation
 
-您可以根据需要添加更多变量到配置文件中，或直接使用命令行参数：
+For more detailed information, see the documentation in the `docs` directory:
+
+- [Installation Guide](docs/installation.md)
+- [Usage Guide](docs/usage.md)
+- [API Documentation](docs/api.md)
+
+## Uninstallation
+
+### Using Fisher
 
 ```fish
-fish_vars check 自定义变量名 期望值
+fisher remove username/fish_variables
+```
+
+### Using Make
+
+```fish
+cd path/to/fish_variables
+make uninstall
 ```
