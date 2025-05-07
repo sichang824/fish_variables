@@ -11,16 +11,8 @@ function fish_vars_list --description "List potentially duplicated variables"
             continue
         end
         
-        # Get variable definition information
-        set -l var_info (set -S $var_name 2>/dev/null)
-        
-        # Extract variable values
-        set -l values
-        for line in $var_info
-            if string match -q "*\[$var_name\]*: |*|*" -- $line
-                set -a values (string replace -r ".*: \|(.*)\|.*" '$1' -- $line)
-            end
-        end
+        # Get variable values
+        set -l values (__fish_vars_utils_get_variable_info $var_name)
         
         # Check if there are multiple values
         if test (count $values) -gt 1

@@ -20,26 +20,40 @@ function fish_vars_check --description "Check Fish variable status"
         echo "=========================="
         
         set -l has_issues false
+        set -l var_data (__fish_vars_utils_parse_config_file $config_file)
         
-        # Read the configuration file line by line
-        # Configuration file format: one variable definition per line, format is "variable_name value"
-        # Example: fish_history_save_on_command true
-        for line in (cat $config_file)
-            # Skip comments and empty lines
-            if string match -q "#*" -- $line; or test -z (string trim $line)
+        if test $status -ne 0
+            return 1
+        end
+        
+        set -l i 1
+        set -l var_name ""
+        set -l var_values
+        
+        while test $i -le (count $var_data)
+            set -l line $var_data[$i]
+            
+            if test "$line" = "--SEPARATOR--"
+                # Process the collected variable
+                __fish_vars_check_single_variable $var_name $var_values
+                if test $status -ne 0
+                    set has_issues true
+                end
+                
+                # Reset for next variable
+                set var_name ""
+                set var_values
+                set i (math $i + 1)
                 continue
             end
             
-            # Split variable name and value
-            set -l parts (string split " " $line)
-            set -l var_name $parts[1]
-            set -l var_value $parts[2..-1]
-            
-            # Check the variable
-            __fish_vars_check_variable $var_name $var_value
-            if test $status -ne 0
-                set has_issues true
+            if test -z "$var_name"
+                set var_name $line
+            else
+                set -a var_values $line
             end
+            
+            set i (math $i + 1)
         end
         
         if test "$has_issues" = "true"
@@ -59,35 +73,28 @@ function fish_vars_check --description "Check Fish variable status"
         set -l var_name $argv[1]
         set -l var_value $argv[2..-1]
         
-        __fish_vars_check_variable $var_name $var_value
+        __fish_vars_check_single_variable $var_name $var_value
         return $status
     end
 end
 
-function __fish_vars_check_variable
+function __fish_vars_check_single_variable --description "Check a single variable"
     set -l var_name $argv[1]
     set -l expected_value $argv[2..-1]
     
     echo "Checking variable: $var_name"
     
-    # Get variable definition information
-    set -l var_info (set -S $var_name 2>/dev/null)
+    # Get variable values
+    set -l values (__fish_vars_utils_get_variable_info $var_name)
+    set -l status_value $status
     
     # Check if variable exists
-    if test -z "$var_info"
+    if test $status_value -ne 0
         echo "  Status: Not set"
         echo "  Expected value: $expected_value"
         echo "  Action: Needs to be set"
         echo ""
         return 1
-    end
-    
-    # Extract variable values
-    set -l values
-    for line in $var_info
-        if string match -q "*\[$var_name\]*: |*|*" -- $line
-            set -a values (string replace -r ".*: \|(.*)\|.*" '$1' -- $line)
-        end
     end
     
     # Check if there are multiple values

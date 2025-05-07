@@ -19,20 +19,37 @@ function fish_vars_fix --description "Fix Fish variable issues"
         echo "Using configuration file: $config_file"
         echo "=========================="
         
-        # Read the configuration file line by line
-        for line in (cat $config_file)
-            # Skip comments and empty lines
-            if string match -q "#*" -- $line; or test -z (string trim $line)
+        set -l var_data (__fish_vars_utils_parse_config_file $config_file)
+        
+        if test $status -ne 0
+            return 1
+        end
+        
+        set -l i 1
+        set -l var_name ""
+        set -l var_values
+        
+        while test $i -le (count $var_data)
+            set -l line $var_data[$i]
+            
+            if test "$line" = "--SEPARATOR--"
+                # Process the collected variable
+                __fish_vars_fix_single_variable $var_name $var_values
+                
+                # Reset for next variable
+                set var_name ""
+                set var_values
+                set i (math $i + 1)
                 continue
             end
             
-            # Split variable name and value
-            set -l parts (string split " " $line)
-            set -l var_name $parts[1]
-            set -l var_value $parts[2..-1]
+            if test -z "$var_name"
+                set var_name $line
+            else
+                set -a var_values $line
+            end
             
-            # Fix the variable
-            __fish_vars_fix_variable $var_name $var_value
+            set i (math $i + 1)
         end
         
         echo "Fix complete!"
@@ -46,16 +63,16 @@ function fish_vars_fix --description "Fix Fish variable issues"
         set -l var_name $argv[1]
         set -l var_value $argv[2..-1]
         
-        __fish_vars_fix_variable $var_name $var_value
+        __fish_vars_fix_single_variable $var_name $var_value
     end
 end
 
-function __fish_vars_fix_variable
+function __fish_vars_fix_single_variable --description "Fix a single variable"
     set -l var_name $argv[1]
     set -l expected_value $argv[2..-1]
     
-    # Check variable status
-    __fish_vars_check_variable $var_name $expected_value
+    # Check variable status first
+    __fish_vars_check_single_variable $var_name $expected_value
     set -l status_code $status
     
     switch $status_code
