@@ -1,4 +1,12 @@
 function fish_vars --description "Fish Variables Management Tool"
+    # Source required utility functions
+    set -l current_dir (dirname (status -f))
+    source "$current_dir/__fish_vars_utils.fish" 2>/dev/null
+    source "$current_dir/fish_vars_check.fish" 2>/dev/null
+    source "$current_dir/fish_vars_fix.fish" 2>/dev/null
+    source "$current_dir/fish_vars_list.fish" 2>/dev/null
+    source "$current_dir/fish_vars_export.fish" 2>/dev/null
+    
     set -l cmd "check"
     
     if test (count $argv) -gt 0
